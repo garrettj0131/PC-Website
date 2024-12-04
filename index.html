@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Computer Build</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .parts-list {
+            margin-top: 20px;
+        }
+        .part-item {
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .part-item a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .part-item a:hover {
+            text-decoration: underline;
+        }
+        .total-sum {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Find Parts for Your Budget Build</h1>
+    <form id="budgetForm">
+        <label for="budget">Select Your Budget:</label>
+        <select id="budget" name="budget" required>
+            <option value="600">$600</option>
+            <option value="800">$800</option>
+            <option value="1000">$1000</option>
+            <option value="1200">$1200</option>
+            <option value="1500">$1500</option>
+        </select>
+
+        <button type="submit">Find Parts</button>
+    </form>
+
+    <div id="partsList" class="parts-list" style="display: none;">
+        <h3>Parts within Your Budget</h3>
+        <div id="partsOutput"></div>
+        <div id="totalSum" class="total-sum" style="display: none;"></div>
+    </div>
+</div>
+
+<script>
+// Define parts for various categories (you could add more parts for any category)
+const allParts = {
+    600: [
+        { name: 'AMD Ryzen 5 5600G', price: 150, link: 'https://www.example.com/ryzen-5600g' },
+        { name: 'NVIDIA GTX 1650', price: 170, link: 'https://www.example.com/gtx-1650' },
+        { name: 'Corsair Vengeance LPX 8GB DDR4-3200', price: 35, link: 'https://www.example.com/corsair-8gb-ram' },
+        { name: 'MSI B450M PRO-VDH MAX', price: 65, link: 'https://www.example.com/msi-b450m' },
+        { name: 'Kingston A2000 500GB SSD', price: 45, link: 'https://www.example.com/kingston-a2000-500gb' },
+        { name: 'EVGA 500W Power Supply', price: 40, link: 'https://www.example.com/evga-500w' },
+        { name: 'Cooler Master MasterBox Q300L', price: 50, link: 'https://www.example.com/coolermaster-q300l' }
+    ],
+    800: [
+        { name: 'AMD Ryzen 5 5600X', price: 160, link: 'https://www.example.com/ryzen-5600x' },
+        { name: 'NVIDIA RTX 3050', price: 250, link: 'https://www.example.com/rtx-3050' },
+        { name: 'Corsair Vengeance 16GB DDR4-3200', price: 40, link: 'https://www.example.com/corsair-16gb-ram' },
+        { name: 'MSI B550-A PRO Motherboard', price: 100, link: 'https://www.example.com/msi-b550' },
+        { name: 'Crucial P3 500GB NVMe SSD', price: 35, link: 'https://www.example.com/crucial-p3-500gb' },
+        { name: 'EVGA 600W Power Supply', price: 35, link: 'https://www.example.com/evga-600w' },
+        { name: 'NZXT H510 Mid Tower Case', price: 70, link: 'https://www.example.com/nzxt-h510' }
+    ],
+    1000: [
+        { name: 'Intel Core i7-11700K', price: 320, link: 'https://www.example.com/core-i7-11700k' },
+        { name: 'NVIDIA RTX 3060', price: 350, link: 'https://www.example.com/rtx-3060' },
+        { name: 'Corsair Vengeance LPX 16GB DDR4-3200', price: 70, link: 'https://www.example.com/corsair-16gb-ram' },
+        { name: 'Gigabyte Z590 AORUS ELITE', price: 180, link: 'https://www.example.com/gigabyte-z590' },
+        { name: 'Samsung 970 EVO Plus 1TB SSD', price: 120, link: 'https://www.example.com/samsung-970-evo' },
+        { name: 'Corsair RM750x 750W PSU', price: 110, link: 'https://www.example.com/corsair-rm750x' },
+        { name: 'Fractal Design Meshify C', price: 90, link: 'https://www.example.com/fractal-design-c' }
+    ],
+    1200: [
+        { name: 'AMD Ryzen 7 5800X', price: 450, link: 'https://www.example.com/ryzen-5800x' },
+        { name: 'NVIDIA RTX 3070', price: 500, link: 'https://www.example.com/rtx-3070' },
+        { name: 'Corsair Vengeance 32GB DDR4-3200', price: 130, link: 'https://www.example.com/corsair-32gb-ram' },
+        { name: 'MSI MAG B550 TOMAHAWK', price: 120, link: 'https://www.example.com/msi-b550' },
+        { name: 'Crucial P5 1TB SSD', price: 150, link: 'https://www.example.com/crucial-p5-1tb' },
+        { name: 'Corsair RM850x 850W PSU', price: 140, link: 'https://www.example.com/corsair-rm850x' },
+        { name: 'NZXT H510 Elite', price: 130, link: 'https://www.example.com/nzxt-h510-elite' }
+    ],
+    1500: [
+        { name: 'Intel Core i9-11900K', price: 550, link: 'https://www.example.com/core-i9-11900k' },
+        { name: 'NVIDIA RTX 3080', price: 700, link: 'https://www.example.com/rtx-3080' },
+        { name: 'Corsair Vengeance 32GB DDR4-3600', price: 150, link: 'https://www.example.com/corsair-32gb-ram-3600' },
+        { name: 'ASUS ROG STRIX Z590-E', price: 250, link: 'https://www.example.com/asus-z590' },
+        { name: 'Samsung 970 EVO Plus 2TB SSD', price: 300, link: 'https://www.example.com/samsung-970-evo-2tb' },
+        { name: 'Corsair RM1000x 1000W PSU', price: 170, link: 'https://www.example.com/corsair-rm1000x' },
+        { name: 'Fractal Design Define R6', price: 180, link: 'https://www.example.com/fractal-r6' }
+    ]
+};
+
+// Function to find parts based on selected budget
+function findParts() {
+    const budget = parseInt(document.getElementById('budget').value);
+    const selectedParts = allParts[budget];
+    let totalSum = 0;
+
+    // Display the parts
+    const partsOutput = document.getElementById('partsOutput');
+    partsOutput.innerHTML = ''; // Clear the previous output
+    totalSum = 0; // Reset the total sum
+
+    if (!selectedParts || selectedParts.length === 0) {
+        partsOutput.innerHTML = '<p>No parts found within this budget range.</p>';
+    } else {
+        selectedParts.forEach(part => {
+            const partDiv = document.createElement('div');
+            partDiv.classList.add('part-item');
+            partDiv.innerHTML = `
+                <strong>${part.name}</strong> - $${part.price} 
+                <a href="${part.link}" target="_blank">View Part</a>
+            `;
+            partsOutput.appendChild(partDiv);
+            totalSum += part.price; // Add price to the total sum
+        });
+
+        // Display the total sum
+        const totalSumDiv = document.getElementById('totalSum');
+        totalSumDiv.style.display = 'block'; // Show the total sum section
+        totalSumDiv.innerHTML = `Total: $${totalSum.toFixed(2)}`;
+    }
+
+    // Show the parts list section
+    document.getElementById('partsList').style.display = 'block';
+}
+
+// Event listener for form submission
+document.getElementById('budgetForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent page reload on form submit
+    findParts(); // Call the function to find and display parts
+});
+</script>
+
+</body>
+</html>
